@@ -23,6 +23,19 @@ export class Cart {
         }
     }
 
+    removeItem(productId: number): void {
+        this.items = this.items.map(item => {
+            if (item.product.id === productId) {
+                return { ...item, quantity: item.quantity - 1 };
+            }
+            return item;
+        }).filter(item => item.quantity > 0);
+    }
+
+    deleteItem(productId: number): void {
+        this.items = this.items.filter(item => item.product.id !== productId);
+    }
+
     getTotalItems(): number {
         return this.items.reduce((total, item) => total + item.quantity, 0);
     }

@@ -5,10 +5,9 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/index.js",
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc"
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -23,9 +22,13 @@
   "homepage": "https://github.com/khemrajuniordev/tic-hb-12-fullstack#readme",
   "dependencies": {
     "@types/node": "^25.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vue": "^3.5.30"
   },
   "devDependencies": {
-    "tsx": "^4.21.0"
+    "@vitejs/plugin-vue": "^6.0.5",
+    "tsx": "^4.21.0",
+    "vite": "^8.0.0",
+    "vue-tsc": "^3.2.5"
   }
 }
