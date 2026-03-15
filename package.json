@@ -1,6 +1,7 @@
 {
   "name": "tic-hub-12---fullstack",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
