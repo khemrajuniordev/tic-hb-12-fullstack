@@ -6,7 +6,7 @@ export interface CartItem {
 }
 
 export class Cart {
-    private items: CartItem[] = [];
+    items: CartItem[] = [];
 
     addItem(product: Product, quantity: number): void {
         const itemExists = this.items.some(item => item.product.id === product.id);
@@ -34,6 +34,15 @@ export class Cart {
 
     deleteItem(productId: number): void {
         this.items = this.items.filter(item => item.product.id !== productId);
+    }
+
+    updateItemQuantity(productId: number, quantity: number): void {
+        this.items = this.items.map(item => {
+            if (item.product.id === productId) {
+                return { ...item, quantity: Math.max(1, quantity) };
+            }
+            return item;
+        });
     }
 
     getTotalItems(): number {
