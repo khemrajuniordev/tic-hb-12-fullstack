@@ -1,13 +1,21 @@
 <template>
-  <div class="app-container">
-    <header class="header">
-      <h1>E-Commerce Vue</h1>
+  <div class="min-h-screen flex flex-col transition-colors duration-300" :class="{ 'dark': isDarkMode }">
+    <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center dark:bg-gray-800">
+      <h1 class="text-2xl font-bold m-0">E-Commerce Vue</h1>
+      <Button 
+        :icon="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'" 
+        severity="secondary" 
+        rounded 
+        aria-label="Toggle Dark Mode"
+        @click="toggleDarkMode"
+      />
     </header>
 
-    <main class="main-content">
-      <div class="products-section">
-        <h2>Produtos</h2>
-        <div class="products-grid">
+    <main class="flex-1 flex flex-col lg:flex-row p-6 gap-8 max-w-7xl mx-auto w-full">
+      <!-- Seção de Produtos -->
+      <section class="flex-[3]">
+        <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">Produtos</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           <ProductCard
             v-for="product in products"
             :key="product.id"
@@ -15,37 +23,84 @@
             @add-to-cart="handleAddToCart"
           />
         </div>
-      </div>
+      </section>
 
-      <aside class="cart-section">
-        <div class="cart-container">
-          <h2>Carrinho</h2>
-          <div class="cart-summary">
-            <p><strong>Total de itens:</strong> {{ cartItemsCount }}</p>
-            <p><strong>Preço Final:</strong> R$ {{ cartFinalPrice }}</p>
+      <!-- Seção de Carrinho -->
+      <aside class="flex-[1] min-w-[320px]">
+        <div class="sticky top-6 flex flex-col gap-4">
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 m-0">Carrinho</h2>
+          
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+            <p class="m-0 mb-2 font-semibold">Total de itens: <span class="text-green-600 dark:text-green-400">{{ cartItemsCount }}</span></p>
+            <p class="m-0 text-lg font-bold">Preço Final: <span class="text-blue-600 dark:text-blue-400">R$ {{ cartFinalPrice }}</span></p>
           </div>
 
-          <div v-if="cartItems.length > 0" class="cart-items">
-            <h3>Itens Adicionados:</h3>
-            <div v-for="item in cartItems" :key="item.product.id" class="cart-item">
-              <div class="item-info">
-                <span>{{ item.product.name }}</span>
-                <span>(R$ {{ item.product.price.toFixed(2) }} x {{ item.quantity }})</span>
-              </div>
-              <div class="item-actions">
-                <button class="btn-icon" @click="handleRemoveItem(item.product.id)">-</button>
-                <span class="quantity">{{ item.quantity }}</span>
-                <button class="btn-icon" @click="handleAddToCart(item.product)">+</button>
-                <button class="btn-danger" @click="handleDeleteItem(item.product.id)">Excluir</button>
-              </div>
+          <div v-if="cartItems.length > 0">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold m-0 dark:text-gray-200">Itens Adicionados:</h3>
+              <Button label="Limpar" icon="pi pi-trash" severity="danger" text @click="confirmClearCart" />
             </div>
+
+            <!-- Listagem de itens com DataView -->
+            <DataView :value="cartItems" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 overflow-hidden">
+              <template #list="slotProps">
+                <div class="flex flex-col">
+                  <div v-for="(item, index) in slotProps.items" :key="index" class="p-4 border-b dark:border-gray-700 last:border-b-0">
+                    <div class="flex flex-col gap-3">
+                      <div class="font-bold text-gray-800 dark:text-gray-100 text-lg">
+                        {{ item.product.name }}
+                      </div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">
+                        R$ {{ item.product.price.toFixed(2) }} unit.
+                      </div>
+                      
+                      <div class="flex justify-between items-center mt-2">
+                        <InputNumber 
+                          :modelValue="item.quantity" 
+                          @update:modelValue="onQuantityChange(item.product, $event)"
+                          inputId="horizontal-buttons" 
+                          showButtons 
+                          buttonLayout="horizontal" 
+                          :step="1" 
+                          :min="1"
+                          inputClass="w-12 text-center"
+                          class="w-32"
+                        >
+                          <template #incrementbuttonicon>
+                            <span class="pi pi-plus" />
+                          </template>
+                          <template #decrementbuttonicon>
+                            <span class="pi pi-minus" />
+                          </template>
+                        </InputNumber>
+
+                        <div class="font-bold text-blue-900 dark:text-blue-300">
+                          R$ {{ (item.product.price * item.quantity).toFixed(2) }}
+                        </div>
+                      </div>
+                      
+                      <Button label="Remover" icon="pi pi-times" severity="danger" text size="small" class="mt-2 self-start p-0" @click="handleDeleteItem(item.product.id)" />
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </DataView>
           </div>
-          <div v-else class="empty-cart">
-            Seu carrinho está vazio.
-          </div>
+          
+          <Card v-else class="text-center shadow-sm dark:bg-gray-800 dark:border-gray-700">
+            <template #content>
+              <i class="pi pi-shopping-cart text-5xl text-gray-300 dark:text-gray-600 mb-4 block"></i>
+              <p class="text-gray-500 dark:text-gray-400 font-medium m-0">Seu carrinho está vazio.</p>
+              <p class="text-sm text-gray-400 dark:text-gray-500 mt-2 m-0">Adicione produtos para continuar.</p>
+            </template>
+          </Card>
+
         </div>
       </aside>
     </main>
+
+    <ConfirmDialog></ConfirmDialog>
+    <Toast />
   </div>
 </template>
 
@@ -56,10 +111,23 @@ import { Product } from './model/product.model';
 import { Category } from './model/category.model';
 import { Cart } from './model/cart.model';
 
+import Button from 'primevue/button';
+import Card from 'primevue/card';
+import DataView from 'primevue/dataview';
+import InputNumber from 'primevue/inputnumber';
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
+
 export default defineComponent({
   name: 'App',
   components: {
-    ProductCard
+    ProductCard,
+    Button,
+    Card,
+    DataView,
+    InputNumber,
+    ConfirmDialog,
+    Toast
   },
   data() {
     const electronics = new Category(1, "Electronics");
@@ -74,7 +142,8 @@ export default defineComponent({
         new Product(4, "Headphones", 300, electronics),
         new Product(5, "Batata Recheada", 25, food),
       ] as Product[],
-      cart: new Cart()
+      cart: new Cart(),
+      isDarkMode: false
     };
   },
   computed: {
@@ -88,15 +157,41 @@ export default defineComponent({
       return this.cart.getFinalPrice().toFixed(2);
     }
   },
+  created() {
+    // Inicialização da classe dark no html baseada num estado se necessário
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+       this.isDarkMode = true;
+       document.documentElement.classList.add('dark');
+    }
+  },
   methods: {
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode;
+      if(this.isDarkMode) {
+          document.documentElement.classList.add('dark');
+      } else {
+          document.documentElement.classList.remove('dark');
+      }
+    },
     handleAddToCart(product: Product) {
       this.cart.addItem(product, 1);
-      // Forcing reactivity update for pure classes in Options API data
-      // In Vue 3, wrapped objects in data() are reactive, but mutating inner class instances 
-      // sometimes require re-assigning if not deep-reactive or to trigger computed correctly.
-      // However, modifying the array inside Cart usually triggers updates if Vue tracks the items array.
-      // To be strictly safe and ensure the UI updates:
       this.cart = Object.assign(new Cart(), this.cart);
+    },
+    onQuantityChange(product: Product, newQuantity: number) {
+        // Encontra o item atual
+        const item = this.cart.getItems().find(i => i.product.id === product.id);
+        if (item) {
+            const difference = newQuantity - item.quantity;
+            if (difference > 0) {
+               this.cart.addItem(product, difference);
+            } else if (difference < 0) {
+               // Remove a quantia correta
+               for(let i=0; i<Math.abs(difference); i++) {
+                   this.cart.removeItem(product.id);
+               }
+            }
+        }
+        this.cart = Object.assign(new Cart(), this.cart);
     },
     handleRemoveItem(productId: number) {
       this.cart.removeItem(productId);
@@ -105,161 +200,28 @@ export default defineComponent({
     handleDeleteItem(productId: number) {
       this.cart.deleteItem(productId);
       this.cart = Object.assign(new Cart(), this.cart);
+    },
+    confirmClearCart() {
+      this.$confirm.require({
+        message: 'Tem certeza que deseja remover todos os itens do carrinho?',
+        header: 'Confirmação',
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: 'Sim, limpar',
+        rejectLabel: 'Cancelar',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        acceptClass: 'p-button-danger',
+        accept: () => {
+          this.cartItems.forEach(item => {
+            this.handleDeleteItem(item.product.id)
+          });
+          (this as any).$toast?.add({ severity: 'success', summary: 'Carrinho Limpo', detail: 'Todos os itens foram removidos.', life: 3000 });
+        }
+      });
     }
   }
 });
 </script>
 
 <style>
-/* Global Resets */
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: 'Inter', 'Roboto', sans-serif;
-  background-color: #f5f7fa;
-  color: #333;
-}
-
-.app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.header {
-  background-color: #2c3e50;
-  color: white;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.main-content {
-  display: flex;
-  flex: 1;
-  padding: 2rem;
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.products-section {
-  flex: 2;
-}
-
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.5rem;
-}
-
-.cart-section {
-  flex: 1;
-  min-width: 300px;
-}
-
-.cart-container {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 2rem;
-}
-
-.cart-summary {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 6px;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid #4CAF50;
-}
-
-.cart-summary p {
-  margin: 0.5rem 0;
-  font-size: 1.1rem;
-}
-
-.cart-items {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.cart-item {
-  display: flex;
-  flex-direction: column;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #eee;
-  gap: 0.5rem;
-}
-
-.item-info {
-  display: flex;
-  flex-direction: column;
-  font-weight: 500;
-}
-
-.item-info span:last-child {
-  font-size: 0.85rem;
-  color: #666;
-  font-weight: normal;
-}
-
-.item-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid #ccc;
-  background-color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
-.btn-icon:hover {
-  background-color: #f0f0f0;
-}
-
-.quantity {
-  min-width: 20px;
-  text-align: center;
-}
-
-.btn-danger {
-  margin-left: auto;
-  background-color: #ff5252;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-.btn-danger:hover {
-  background-color: #ff1744;
-}
-
-.empty-cart {
-  text-align: center;
-  color: #888;
-  padding: 2rem 0;
-}
+/* Global CSS foi movido para arquivos separados usando Tailwind */
 </style>

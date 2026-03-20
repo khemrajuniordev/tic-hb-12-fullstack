@@ -1,19 +1,45 @@
 <template>
-  <div class="product-card">
-    <div class="category">{{ product.category.name }}</div>
-    <h3 class="name">{{ product.name }}</h3>
-    <div class="price">R$ {{ product.price.toFixed(2) }}</div>
-    <button @click="addToCart" class="add-button">Adicionar</button>
-  </div>
+  <Card class="hover:shadow-lg transition-transform duration-200 hover:-translate-y-1 h-full flex flex-col justify-between dark:bg-gray-800 dark:border-gray-700">
+    <template #title>
+      <div class="text-xs text-gray-500 uppercase tracking-wide dark:text-gray-400">
+        {{ product.category.name }}
+      </div>
+      <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100 mt-1 m-0">
+        {{ product.name }}
+      </h3>
+    </template>
+    
+    <template #content>
+      <div class="text-2xl font-bold text-blue-900 dark:text-blue-300">
+        R$ {{ product.price.toFixed(2) }}
+      </div>
+    </template>
+    
+    <template #footer>
+      <Button 
+        label="Adicionar" 
+        icon="pi pi-cart-plus" 
+        class="w-full mt-4" 
+        severity="success" 
+        @click="addToCart" 
+      />
+    </template>
+  </Card>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import type { Product } from '../model/product.model';
+import Card from 'primevue/card';
+import Button from 'primevue/button';
 
 export default defineComponent({
   name: 'ProductCard',
+  components: {
+    Card,
+    Button
+  },
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -29,55 +55,5 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.product-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  background-color: white;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  transition: transform 0.2s;
-}
-
-.product-card:hover {
-  transform: translateY(-2px);
-}
-
-.category {
-  font-size: 0.8rem;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.name {
-  margin: 0;
-  font-size: 1.2rem;
-  color: #333;
-}
-
-.price {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: #2c3e50;
-  margin-top: auto;
-}
-
-.add-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-top: 8px;
-  transition: background-color 0.2s;
-}
-
-.add-button:hover {
-  background-color: #45a049;
-}
+/* Estilos Customizados foram removidos para a Etapa 2 de acordo com a exigência (apenas utilitários Tailwind) */
 </style>
